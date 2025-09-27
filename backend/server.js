@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import healthRoutes from "./routes/healthRoutes.js";
+import surveyRoutes from "./routes/survey.routes.js";
 
 const app = express();
 app.use(express.json());
@@ -13,7 +13,7 @@ mongoose.connect("mongodb+srv://manojsurya463:BjxbMbniGwKlMbmT@cluster0.tjaza.mo
   .catch(err => console.error("MongoDB Error:", err));
 
 // Routes
-app.use("/api", healthRoutes);
+app.use("/api", surveyRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
