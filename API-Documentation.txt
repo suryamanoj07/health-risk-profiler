@@ -1,0 +1,246 @@
+Health Risk Profiler API Documentation
+
+Base URL
+http://localhost:5000/api
+
+1. Manual Survey Analysis
+
+Endpoint
+POST /parse
+
+Headers
+Content-Type: application/json
+
+Request Body
+{
+  "age": 42,
+  "smoker": true,
+  "exercise": "rarely",
+  "diet": "high sugar"
+}
+
+Response
+{
+  "risk_level": "high",
+  "score": 85,
+  "factors": ["smoking", "poor diet", "low exercise"],
+  "recommendations": [
+    "Quit smoking immediately - consider nicotine replacement therapy",
+    "Reduce sugar intake to less than 25g per day",
+    "Start with 30 minutes of walking daily"
+  ],
+  "rationale": ["smoking", "high sugar diet", "low activity"],
+  "status": "ok"
+}
+
+Postman Setup
+Method: POST
+URL: http://localhost:5000/api/parse
+Headers: Content-Type: application/json
+Body: Raw JSON (copy the request body above)
+
+-------------------------------------------------------------------------------------
+
+2. OCR Processing
+
+Endpoint
+POST /ocr
+
+Headers
+No special headers needed
+
+Request Body
+Form-data:
+Key: image
+Type: File
+Value: Select your image file
+
+Response
+{
+  "answers": {
+    "age": 42,
+    "smoker": true,
+    "exercise": "rarely",
+    "diet": "high sugar"
+  },
+  "missing_fields": [],
+  "confidence": 0.92,
+  "raw_text": "Age: 42\nSmoker: yes\nExercise: rarely\nDiet: high sugar"
+}
+
+Postman Setup
+Method: POST
+URL: http://localhost:5000/api/ocr
+Body: form-data
+Key: image (File type)
+Value: Select image file
+
+-------------------------------------------------------------------------------------
+
+3. Test Examples
+
+Example 1: High Risk Profile
+Request:
+{
+  "age": 42,
+  "smoker": true,
+  "exercise": "rarely",
+  "diet": "high sugar"
+}
+Response: High risk (score: 85)
+
+Example 2: Low Risk Profile
+Request:
+{
+  "age": 25,
+  "smoker": false,
+  "exercise": "regularly",
+  "diet": "balanced"
+}
+Response: Low risk (score: 0)
+
+Example 3: Medium Risk Profile
+Request:
+{
+  "age": 55,
+  "smoker": false,
+  "exercise": "occasionally",
+  "diet": "high fat"
+}
+Response: Medium risk (score: 33)
+
+-------------------------------------------------------------------------------------
+
+4. Error Responses
+
+Incomplete Data
+Request:
+{
+  "age": 42
+}
+Response:
+{
+  "status": "incomplete_profile",
+  "reason": ">50% fields missing"
+}
+
+Invalid File Type
+Request: Upload PDF file to OCR endpoint
+Response:
+{
+  "status": "error",
+  "message": "Invalid file type. Please upload a valid image file (JPG, PNG, GIF, BMP, TIFF)"
+}
+
+Non-Health Survey
+Request: Upload random image to OCR endpoint
+Response:
+{
+  "status": "error",
+  "message": "This doesn't appear to be a health survey form. Please upload an image containing a health survey with fields like Age, Smoker, Exercise, and Diet."
+}
+
+-------------------------------------------------------------------------------------
+
+5. OCR Image Requirements
+
+Supported Formats
+JPG, JPEG
+PNG
+GIF
+BMP
+TIFF
+
+Expected Format
+Age: 42
+Smoker: yes
+Exercise: rarely
+Diet: high sugar
+
+Tips
+Clear, readable text
+Good lighting
+Straight angle
+Max size: 10MB
+
+-------------------------------------------------------------------------------------
+
+6. Risk Scoring
+
+Scoring Rules
+Smoking: 40 points
+Low Exercise: 25 points
+High Sugar Diet: 20 points
+High Fat Diet: 15 points
+Age 65+: 15 points
+Age 50-64: 8 points
+
+Risk Levels
+0-39: Low Risk
+40-69: Medium Risk
+70+: High Risk
+
+-------------------------------------------------------------------------------------
+
+7. Quick Postman Collection
+
+Request 1: High Risk Test
+Method: POST
+URL: http://localhost:5000/api/parse
+Headers: Content-Type: application/json
+Body: {
+  "age": 42,
+  "smoker": true,
+  "exercise": "rarely",
+  "diet": "high sugar"
+}
+
+Request 2: OCR Test
+Method: POST
+URL: http://localhost:5000/api/ocr
+Body: form-data
+Key: image (File)
+Value: Select image file
+
+Request 3: Low Risk Test
+Method: POST
+URL: http://localhost:5000/api/parse
+Headers: Content-Type: application/json
+Body: {
+  "age": 25,
+  "smoker": false,
+  "exercise": "regularly",
+  "diet": "balanced"
+}
+
+Request 4: Error Test
+Method: POST
+URL: http://localhost:5000/api/parse
+Headers: Content-Type: application/json
+Body: {
+  "age": 42
+}
+
+-------------------------------------------------------------------------------------
+
+8. Expected Results
+
+Input: 42, smoker, rarely, high sugar
+Risk Level: High
+Score: 85
+Factors: smoking, poor diet, low exercise
+
+Input: 25, non-smoker, regularly, balanced
+Risk Level: Low
+Score: 0
+Factors: none
+
+Input: 55, non-smoker, occasionally, high fat
+Risk Level: Medium
+Score: 33
+Factors: high fat diet, middle age
+
+Input: 65, smoker, rarely, high sugar
+Risk Level: High
+Score: 100
+Factors: smoking, poor diet, low exercise, advanced age
